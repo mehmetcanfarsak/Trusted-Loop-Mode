@@ -1,0 +1,48 @@
+name: Feature request
+description: Suggest an enhancement or a new integration
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Note the project's **non-goals**: Trusted-Loop is a
+        completion *gate*, not an adversarial/red-team monitor, not a correctness prover,
+        and not a substitute for code review. The judge is a reader and never calls tools.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: The use case or pain point, not just the proposed solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - New CLI adapter (OpenCode, Codex, ...)
+        - New judge provider / format
+        - Gate / aggregation behavior
+        - Safety (caps, scrubbing, escalation)
+        - Commands / UX
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false

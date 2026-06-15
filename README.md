@@ -5,9 +5,10 @@
 > verify completion against **fresh test/build/lint evidence** — not the agent's
 > own claim of "done".
 
+[![Tests](https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/actions/workflows/tests.yml/badge.svg)](https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/actions/workflows/tests.yml)
 [![tests](https://img.shields.io/badge/tests-154%20passing-brightgreen)](tests/run_tests.py)
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](Makefile)
-[![Python](https://img.shields.io/badge/python-3-blue)](#development)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](#development)
 [![deps](https://img.shields.io/badge/runtime%20deps-stdlib%20only-blue)](#development)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -26,6 +27,45 @@ evidence-backed instruction to continue.
 > **The judge is a reader, not an agent.** It never calls tools. It reasons over
 > the transcript (every tool call and result the agent already produced) plus
 > fresh ground truth that the *hook* gathered by re-running your checks.
+
+## Contents
+
+- [How it works](#how-it-works)
+- [Architecture](#architecture)
+- [Install](#install)
+- [Usage](#usage)
+- [Ensemble guidance](#ensemble-guidance)
+- [Unattended-run safety](#unattended-run-safety)
+- [Configuration](#configuration)
+- [Evaluation](#evaluation)
+- [FAQ](#faq)
+- [Known limitations](#known-limitations)
+- [Development](#development)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+
+## How it works
+
+When the agent tries to stop, the `Stop` hook runs this gate:
+
+```
+agent tries to stop ──▶ Stop hook
+  1. loop armed?            no  ─▶ allow stop (normal Claude Code)
+  2. ≥1 judge configured?   no  ─▶ disarm + allow stop
+  3. hard cap / timeout?    yes ─▶ finalize(report) + allow stop
+  4. re-run your checks NOW; hash the evidence
+  5. stuck (no change)?     yes ─▶ finalize(stuck) + allow stop
+  6. ask ALL judges — independent, parallel, decorrelated
+  7. aggregate by EVIDENCE, not votes:
+       complete ─▶ checkpoint + finalize + allow stop
+       error    ─▶ finalize(judge_error) + allow stop   (never hang)
+       block    ─▶ hand the agent one evidence-cited instruction, keep working
+```
+
+The hard caps and stuck-detection are the real safety net (the loop *always*
+eventually stops); the judge ensemble is the quality knob that decides whether
+"done" is real.
 
 ## Architecture
 
@@ -75,7 +115,7 @@ shows live state; `/loop-clear-goal` disarms.
 API keys are referenced by **environment-variable name** only — they are read from
 your environment at call time and never written to disk.
 
-## Ensemble guidance (§10)
+## Ensemble guidance
 
 The only reason to run more than one judge is **decorrelation**:
 
@@ -86,7 +126,7 @@ The only reason to run more than one judge is **decorrelation**:
 - Pin temperature ≈ 0. In an approve-to-stop gate a high-variance judge can only
   wrongly *block*, so it is strictly harmful.
 
-## Unattended-run safety (§11)
+## Unattended-run safety
 
 - **Hard caps** (iterations, wall-clock) finalize regardless of the judges — the
   cap is the real safety, the ensemble is the quality knob. The wall-clock cap is
@@ -105,7 +145,7 @@ The only reason to run more than one judge is **decorrelation**:
 - **Sandboxing is the operator's job.** Run unattended loops with appropriate
   `permissions.deny` / `sandbox` settings; review the auto-commits the loop makes.
 
-## Configuration (`userConfig`, prompted on enable)
+## Configuration
 
 `MAX_ITERATIONS` (12) · `WALL_CLOCK_MINUTES` (120) · `STUCK_LIMIT` (3) ·
 `VERIFY_WITHOUT_GOAL` (false) · `NOTIFY_WEBHOOK` (optional, sensitive). The judge
@@ -116,7 +156,7 @@ All runtime state lives **in-tree** under `.claude/trusted-loop/` (gitignored), 
 an unattended run is transparent: watch `decisions.jsonl` grow, read the live
 `state.json`, inspect `last_report.json`.
 
-## Evaluation plan (§15)
+## Evaluation
 
 Treat the system as a **safety-vs-usefulness tradeoff**, not pass/fail. The loop
 generates its own eval set in `decisions.jsonl`: build a small labelled set of
@@ -182,7 +222,7 @@ Yes — the `core/` engine is agent-agnostic. Add a thin adapter under
 decision into that CLI's "keep going" contract. OpenCode and Codex stubs are
 included.
 
-## Known limitations (§17)
+## Known limitations
 
 - A reader judge verifies only what's in the transcript + fresh checks; it cannot
   independently audit **test quality**.
@@ -193,10 +233,34 @@ included.
 
 ## Development
 
-```
-make test       # stdlib unittest, no network
-make coverage    # enforces 100% line coverage (dev-only coverage.py)
+```bash
+git clone https://github.com/mehmetcanfarsak/Trusted-Loop-Mode
+cd Trusted-Loop-Mode
+
+make test       # stdlib unittest, no network, no real judges
+make coverage   # enforces 100% line coverage (dev-only coverage.py)
 ```
 
-Runtime is **standard library only** (hooks run with no `pip install`).
-`coverage.py` is a dev-only dependency. MIT licensed.
+Requirements: **Python 3.8+** at runtime (standard library only — hooks run with
+no `pip install`); `coverage.py` is a dev-only dependency, and `jq` is needed
+only by `setup.sh`. The test suite mocks all network and subprocess calls, so it
+runs fully offline.
+
+## Contributing
+
+Contributions are welcome — especially **new CLI adapters** (the `core/` engine is
+agent-agnostic; see `agents/opencode/README.md` for the contract) and **new judge
+providers**. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, and please
+keep `core/` stdlib-only and coverage at 100%.
+
+## Security
+
+Trusted-Loop sends a scrubbed, truncated transcript to external judge providers
+and runs your checks as shell commands. Read [SECURITY.md](SECURITY.md) for the
+threat model and how to report a vulnerability **privately**. Run unattended loops
+in a sandbox.
+
+## License
+
+[MIT](LICENSE) © Mehmet Can Farsak. See also [CHANGELOG.md](CHANGELOG.md) and, if
+you use this in research or tooling, [CITATION.cff](CITATION.cff).

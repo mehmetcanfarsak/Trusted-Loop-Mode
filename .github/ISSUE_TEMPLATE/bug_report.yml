@@ -1,0 +1,93 @@
+name: Bug report
+description: Report something that isn't working as expected
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please fill out the sections below so it can be reproduced quickly.
+        **Do not paste API keys, secrets, or unsanitized transcript content.**
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: CLI adapter
+      description: Which adapter are you using?
+      options:
+        - claude-code
+        - opencode (stub)
+        - codex (stub)
+        - other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: The agent stopped even though a judge cited a failing check...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or actions.
+      placeholder: |
+        1. /loop-judges add --id openai-gpt --format openai --endpoint https://api.openai.com/v1 --model gpt-4o --key-env OPENAI_API_KEY
+        2. /loop-set-goal "make the suite green" --checks "pytest -q"
+        3. Let the agent reach Stop
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: judges
+    attributes:
+      label: Judge format(s) involved
+      multiple: true
+      options:
+        - openai
+        - anthropic
+        - other / OpenAI-compatible
+        - not relevant
+    validations:
+      required: false
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: Output of `python3 --version`
+      placeholder: "Python 3.12.1"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15.1 / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output (sanitized)
+      description: |
+        Paste the relevant `decisions.jsonl` line(s), `last_report.json`, or hook output.
+        Remove anything sensitive — file paths, session IDs, repo names, secrets.
+      render: shell
+    validations:
+      required: false

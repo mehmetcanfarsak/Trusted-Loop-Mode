@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/discussions
+    about: Ask questions, share ideas, or discuss usage that doesn't fit a bug or feature request.
+  - name: Report a security vulnerability
+    url: https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/security/advisories/new
+    about: Please report vulnerabilities privately, not as a public issue.
