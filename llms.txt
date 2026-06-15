@@ -1,0 +1,87 @@
+# trusted-loop
+
+> A Claude Code plugin (and multi-agent framework) that keeps an unattended AI coding agent working until an independent ensemble of LLM judges confirms the task is actually done — verified against fresh behavioral evidence (test/build/lint output), not the agent's own claim of completion.
+
+## What this project does
+
+Trusted-Loop Mode solves premature completion (early stopping) in unattended AI coding agents: the tendency to declare "done — all tests pass" without proof, then stop while work remains.
+
+It intercepts the agent's attempt to stop with a Claude Code `Stop` hook, then:
+1. **Re-runs your deterministic checks now** (e.g. `pytest -q`, `npm test`, `npm run lint`) to gather fresh ground truth — immune to stale claims in the transcript.
+2. **Asks an independent ensemble of judge models** (e.g. one OpenAI + one Anthropic) — in parallel, with no judge seeing another's verdict (decorrelation) — whether a FIXED definition of done is met, grounded in that fresh evidence.
+3. **Either lets the agent stop, or feeds it one precise, evidence-cited instruction to continue.** A confident, evidence-backed "incomplete" blocks the stop; an evidence-free objection does not. Verifiable facts are not voted on.
+
+The judge is a reader, not an agent: it never calls tools. It reasons over the transcript the agent already produced plus the fresh check output the hook pasted in.
+
+## Who should use this
+
+- Developers running Claude Code on long, unattended tasks ("make the suite green", large build-outs, research loops) who can't babysit the CLI and need the agent to not stop early.
+- Teams that want completion gated on behavioral evidence and a fixed scope, not the model's self-assessment.
+- Researchers studying LLM-as-judge reliability, judge decorrelation, and safety-vs-usefulness tradeoffs (the loop logs its own eval dataset to `decisions.jsonl`).
+- Plugin authors building for other AI coding CLIs (the `core/` engine is agent-agnostic).
+
+## Key technical details
+
+- Language: Python 3 (standard library only — hooks run with no `pip install`).
+- Supported agents: Claude Code (v0.1); OpenCode and Codex adapter stubs included.
+- Judge providers: OpenAI-format and Anthropic-format chat-completion endpoints (any OpenAI-compatible base URL works).
+- API keys are referenced by environment-variable NAME only and are never written to disk.
+- State is stored in-tree under `<project>/.claude/trusted-loop/` (gitignored) so an unattended run is transparent and inspectable.
+- Safety: hard caps (max iterations, wall-clock), stuck-detection via an evidence hash, per-iteration git checkpoint, best-effort secret scrubbing, fail-open on judge error (never traps the agent).
+- Test coverage: 100% (154 tests, stdlib `unittest`).
+- License: MIT.
+
+## Install
+
+- `/plugin marketplace add mehmetcanfarsak/Trusted-Loop-Mode`
+- `/plugin install trusted-loop@trusted-loop`
+
+## Commands
+
+- `/loop-judges add --id <id> --format openai|anthropic --endpoint <url> --model <m> --key-env <ENV>` — configure the judge ensemble (pick decorrelated families).
+- `/loop-set-goal "<goal>" --criteria "..." --checks "pytest -q"` — arm the loop with a fixed definition of done.
+- `/loop-status` — show live goal, iteration, criteria, checks, judges.
+- `/loop-clear-goal` — disarm (Stop behaves like normal Claude Code).
+
+## Architecture
+
+```
+core/                    Agent-agnostic engine (state, judges, gate, manage CLI)
+agents/claude-code/      Claude Code integration (commands + hooks + setup.sh)
+agents/opencode/         Future: OpenCode adapter stub
+agents/codex/            Future: Codex adapter stub
+tests/                   154 tests, 100% coverage
+```
+
+All heavy logic lives in `core/`; each per-CLI adapter is a thin shim translating that CLI's stdin/stdout to the neutral decision `core.gate.run_stop_gate` returns.
+
+## Common questions
+
+Q: How do I stop a Claude Code agent from quitting before the work is actually finished?
+A: Install Trusted-Loop Mode, configure at least one judge with `/loop-judges`, and arm a goal with `/loop-set-goal`. A `Stop` hook then re-runs your tests and asks the judge ensemble whether the fixed criteria are met against that fresh output; if not, the agent is handed a precise instruction and keeps working.
+
+Q: Why does an AI coding agent say "all tests pass" when they don't?
+A: The agent reasons over a transcript that may be stale (a check passed before a later edit) or over-optimistic self-assessment. Trusted-Loop re-runs the checks at stop time and trusts the fresh exit codes over the agent's claim, so a real failure blocks completion.
+
+Q: What is an LLM judge ensemble and why use more than one judge?
+A: Each judge is one stateless model call that verifies completion. The only reason to run more than one is decorrelation: judges from different families/providers make different mistakes, so a defect one misses another may catch. Two decorrelated judges beat three similar ones; gains saturate fast. Never make the agent's own model family the decisive judge (self-preference bias). Keep temperature near 0.
+
+Q: How do I keep an AI agent working unattended until a task is done?
+A: Arm Trusted-Loop with a goal and deterministic checks. Hard caps (max iterations, wall-clock) and stuck-detection guarantee it always eventually stops, while the judge ensemble is the quality knob that decides whether "done" is real. Set `NOTIFY_WEBHOOK` to be pinged on finalize/stuck/judge-error so "unattended" can mean "notify me when you need me".
+
+Q: Does Trusted-Loop send my code to external model providers? Is it safe?
+A: The scrubbed, truncated transcript and fresh check output are sent to each configured judge endpoint. Secret scrubbing is best-effort (not a guarantee); for sensitive repos prefer no-retention endpoints or a local judge. API keys are referenced by env-var name and never written to disk. Run unattended loops in a sandbox with appropriate permissions.
+
+Q: How is this different from a code-review bot or a correctness prover?
+A: It is neither. It is a completion gate: it checks whether a fixed, user-stated definition of done is met against fresh evidence. It is not an adversarial monitor, not a correctness prover, and not a substitute for code review.
+
+Q: Can I add Trusted-Loop support for OpenCode or OpenAI Codex?
+A: Yes. The `core/` engine is agent-agnostic. Add a thin adapter under `agents/<name>/` that parses that CLI's stop event, calls `core.gate.run_stop_gate`, and translates the neutral decision into that CLI's "keep going" contract. Stub directories for OpenCode and Codex are already included.
+
+Q: Where does Trusted-Loop store its state, and will it pollute my git history?
+A: In-tree under `.claude/trusted-loop/` (state.json, judges.json, decisions.jsonl, last_report.json), with a `.gitignore` dropped in automatically so nothing enters version control. You can watch the run live by reading those files.
+
+## Docs
+
+- Full README: https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/blob/main/README.md
+- Agent operating contract: https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/blob/main/CLAUDE.md

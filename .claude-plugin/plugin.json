@@ -1,0 +1,59 @@
+{
+  "name": "trusted-loop",
+  "version": "0.1.0",
+  "description": "Keep a coding agent working on a long-running, unattended task until an independent ensemble of judge models confirms completion against fresh behavioral evidence — not the agent's own claims.",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-coding-agent",
+    "ai-agents",
+    "hooks",
+    "stop-hook",
+    "unattended-agents",
+    "agent-verification",
+    "completion-gating",
+    "llm-judge",
+    "llm-as-judge",
+    "judge-ensemble",
+    "agentic-loop",
+    "anthropic",
+    "openai"
+  ],
+  "author": {
+    "name": "Mehmet Can Farsak",
+    "url": "https://github.com/mehmetcanfarsak"
+  },
+  "homepage": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode",
+  "repository": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode.git",
+  "license": "MIT",
+  "commands": "./agents/claude-code/commands",
+  "hooks": "./agents/claude-code/hooks/hooks.json",
+  "userConfig": {
+    "MAX_ITERATIONS": {
+      "type": "number",
+      "description": "Hard cap on block→continue iterations before the loop finalizes and allows stop.",
+      "default": 12
+    },
+    "WALL_CLOCK_MINUTES": {
+      "type": "number",
+      "description": "Wall-clock budget (minutes) after which the loop finalizes regardless of judges.",
+      "default": 120
+    },
+    "STUCK_LIMIT": {
+      "type": "number",
+      "description": "Allow stop after this many iterations with no observable change (evidence hash stable).",
+      "default": 3
+    },
+    "VERIFY_WITHOUT_GOAL": {
+      "type": "boolean",
+      "description": "If true, with no goal armed, infer one from the user's last request instead of allowing stop.",
+      "default": false
+    },
+    "NOTIFY_WEBHOOK": {
+      "type": "string",
+      "description": "Optional URL POSTed on stuck / finalize / judge-error so unattended can mean 'notify me'.",
+      "default": "",
+      "sensitive": true
+    }
+  }
+}

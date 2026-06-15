@@ -1,0 +1,49 @@
+{
+  "description": "Trusted-Loop Mode — gate the agent's Stop until an independent judge ensemble confirms completion against fresh evidence.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/agents/claude-code/hooks_scripts/on_stop.py",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/agents/claude-code/hooks_scripts/on_stop.py --subagent",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "auto|manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/agents/claude-code/hooks_scripts/on_precompact.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/agents/claude-code/hooks_scripts/on_session_start.py"
+          }
+        ]
+      }
+    ]
+  }
+}

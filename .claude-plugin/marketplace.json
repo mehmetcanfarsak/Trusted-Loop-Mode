@@ -1,0 +1,37 @@
+{
+  "name": "trusted-loop",
+  "description": "Marketplace for Trusted-Loop Mode — evidence-grounded, judge-ensemble completion gating for unattended coding agents.",
+  "version": "0.1.0",
+  "owner": {
+    "name": "Mehmet Can Farsak",
+    "url": "https://github.com/mehmetcanfarsak"
+  },
+  "plugins": [
+    {
+      "name": "trusted-loop",
+      "source": "./",
+      "description": "Gate the agent's Stop until an independent ensemble of judge models confirms the work is done against fresh test/build/lint evidence and a fixed definition of done.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Mehmet Can Farsak",
+        "url": "https://github.com/mehmetcanfarsak"
+      },
+      "homepage": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode",
+      "repository": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode.git",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "ai-coding-agent",
+        "hooks",
+        "stop-hook",
+        "agent-verification",
+        "llm-judge",
+        "llm-as-judge",
+        "judge-ensemble",
+        "unattended-agents"
+      ]
+    }
+  ]
+}

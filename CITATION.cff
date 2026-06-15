@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use Trusted-Loop Mode in your research or tooling, please cite it."
+title: "Trusted-Loop Mode: Evidence-Grounded Completion Gating for Unattended AI Coding Agents"
+abstract: >-
+  A Claude Code plugin and multi-agent framework that keeps an unattended AI
+  coding agent working until an independent ensemble of LLM judges confirms the
+  task is complete. Completion is verified against fresh behavioral evidence
+  (test/build/lint output, tool results, diffs) re-gathered at stop time and a
+  fixed definition of done — not the agent's own claim of completion. Judges run
+  independently and in parallel for decorrelation; aggregation is by evidence,
+  not votes (a confident, evidence-cited "incomplete" blocks; an evidence-free
+  objection does not). Hard caps, stuck-detection, and fail-open-on-error make
+  unattended runs safe, and every decision is logged to an eval dataset.
+type: software
+authors:
+  - family-names: "Farsak"
+    given-names: "Mehmet Can"
+    website: "https://github.com/mehmetcanfarsak"
+repository-code: "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode"
+url: "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode"
+license: MIT
+version: "0.1.0"
+keywords:
+  - claude-code
+  - claude-code-plugin
+  - ai-coding-agent
+  - llm-as-judge
+  - llm-judge-ensemble
+  - agent-verification
+  - unattended-agents
+  - completion-gating
+  - large-language-models
+  - stop-hook
+  - agentic-loop
+  - evaluation

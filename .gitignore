@@ -1,0 +1,11 @@
+InitialProjectGuide.md
+
+# In-tree runtime state (also self-ignored by .claude/trusted-loop/.gitignore)
+.claude/trusted-loop/
+
+# Python / coverage
+__pycache__/
+*.pyc
+.coverage
+.coverage.*
+htmlcov/
