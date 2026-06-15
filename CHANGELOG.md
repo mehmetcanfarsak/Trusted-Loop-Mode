@@ -47,8 +47,12 @@ Initial release.
 - **Tests** — 154 tests, **100% line coverage**, stdlib `unittest` only (network
   and subprocess fully mocked); enforced by `make coverage`.
 - **Docs & metadata** — README (with FAQ), CONTRIBUTING, SECURITY, LICENSE (MIT),
-  `llms.txt`, `CITATION.cff`, GitHub issue/PR templates, and a CI workflow testing
-  Python 3.8–3.13.
+  GitHub issue/PR templates, and a CI workflow testing Python 3.8–3.13.
+- **Discovery / search optimization** — `llms.txt` (LLM answer-engine summary with
+  FAQ), `codemeta.json` (schema.org/JSON-LD software metadata), `CITATION.cff`,
+  a `$schema`-validated `plugin.json` with `displayName` + discovery `keywords`,
+  marketplace `keywords` + `category` + `tags`, and a `REPO_METADATA.md` with the
+  recommended GitHub description and topics — all sharing one consistent keyword set.
 
 [Unreleased]: https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/releases/tag/v0.1.0

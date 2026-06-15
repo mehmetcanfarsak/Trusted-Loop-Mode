@@ -27,23 +27,29 @@ value:
 ```
 claude-code
 claude-code-plugin
+claude-code-hooks
+stop-hook
 ai-coding-agent
+ai-agents
+autonomous-agents
+unattended-agents
+agent-verification
+completion-verification
 llm-as-judge
 llm-judge
-ai-agents
-agent-verification
-unattended-agents
-stop-hook
-agentic-loop
-llm
+judge-ensemble
+llm-evaluation
 anthropic
 openai
 developer-tools
 ai-productivity
-evaluation
 prompt-engineering
 python
 ```
+
+(20 topics — the GitHub maximum. They are kept consistent with `keywords` in
+`plugin.json` / `marketplace.json` and `codemeta.json` so every discovery surface
+reinforces the same terms.)
 
 ## Apply with the GitHub CLI
 
@@ -53,7 +59,7 @@ Once `gh` is installed and authenticated (`gh auth login`):
 gh repo edit mehmetcanfarsak/Trusted-Loop-Mode \
   --description "Keep an unattended Claude Code agent working until an independent ensemble of LLM judges confirms the task is done — verified against fresh test/build output, not the agent's own claim." \
   --homepage "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode#readme" \
-  --add-topic claude-code,claude-code-plugin,ai-coding-agent,llm-as-judge,llm-judge,ai-agents,agent-verification,unattended-agents,stop-hook,agentic-loop,llm,anthropic,openai,developer-tools,ai-productivity,evaluation,prompt-engineering,python
+  --add-topic claude-code,claude-code-plugin,claude-code-hooks,stop-hook,ai-coding-agent,ai-agents,autonomous-agents,unattended-agents,agent-verification,completion-verification,llm-as-judge,llm-judge,judge-ensemble,llm-evaluation,anthropic,openai,developer-tools,ai-productivity,prompt-engineering,python
 ```
 
 ## Other discoverability checklist

@@ -1,0 +1,45 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "trusted-loop",
+  "name": "Trusted-Loop Mode",
+  "description": "A Claude Code plugin that keeps an unattended AI coding agent working until an independent ensemble of LLM judges confirms the task is complete, verified against fresh behavioral evidence (test/build/lint output) and a fixed definition of done — not the agent's own claim. Judges run independently and in parallel for decorrelation; aggregation is by evidence, not votes.",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "AI coding agent tooling",
+  "operatingSystem": ["Linux", "macOS", "Windows"],
+  "programmingLanguage": "Python",
+  "runtimePlatform": "Python 3.8+",
+  "softwareRequirements": "Python 3.8+ (standard library only); coverage.py for development; jq for the installer",
+  "codeRepository": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode",
+  "url": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode",
+  "issueTracker": "https://github.com/mehmetcanfarsak/Trusted-Loop-Mode/issues",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "version": "0.1.0",
+  "developmentStatus": "active",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Mehmet Can",
+      "familyName": "Farsak",
+      "url": "https://github.com/mehmetcanfarsak"
+    }
+  ],
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "claude-code-hooks",
+    "stop-hook",
+    "ai-coding-agent",
+    "autonomous-agents",
+    "unattended-agents",
+    "agent-verification",
+    "completion-verification",
+    "llm-as-judge",
+    "judge-ensemble",
+    "llm-evaluation",
+    "definition-of-done",
+    "anthropic",
+    "openai",
+    "developer-tools"
+  ]
+}

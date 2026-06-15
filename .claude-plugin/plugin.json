@@ -1,23 +1,30 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "trusted-loop",
+  "displayName": "Trusted-Loop Mode",
   "version": "0.1.0",
-  "description": "Keep a coding agent working on a long-running, unattended task until an independent ensemble of judge models confirms completion against fresh behavioral evidence — not the agent's own claims.",
+  "description": "Claude Code plugin that gates an AI coding agent's Stop with an independent LLM-judge ensemble — keep an unattended agent working until tests/build prove the task is done, not just when it claims so.",
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "claude-code-hooks",
+    "stop-hook",
     "ai-coding-agent",
     "ai-agents",
-    "hooks",
-    "stop-hook",
+    "autonomous-agents",
+    "agentic-workflow",
     "unattended-agents",
     "agent-verification",
-    "completion-gating",
-    "llm-judge",
+    "completion-verification",
     "llm-as-judge",
+    "llm-judge",
     "judge-ensemble",
-    "agentic-loop",
+    "llm-evaluation",
+    "definition-of-done",
     "anthropic",
-    "openai"
+    "openai",
+    "developer-tools",
+    "python"
   ],
   "author": {
     "name": "Mehmet Can Farsak",
@@ -31,26 +38,31 @@
   "userConfig": {
     "MAX_ITERATIONS": {
       "type": "number",
+      "title": "Max iterations",
       "description": "Hard cap on block→continue iterations before the loop finalizes and allows stop.",
       "default": 12
     },
     "WALL_CLOCK_MINUTES": {
       "type": "number",
+      "title": "Wall-clock budget (minutes)",
       "description": "Wall-clock budget (minutes) after which the loop finalizes regardless of judges.",
       "default": 120
     },
     "STUCK_LIMIT": {
       "type": "number",
+      "title": "Stuck limit",
       "description": "Allow stop after this many iterations with no observable change (evidence hash stable).",
       "default": 3
     },
     "VERIFY_WITHOUT_GOAL": {
       "type": "boolean",
+      "title": "Verify without an explicit goal",
       "description": "If true, with no goal armed, infer one from the user's last request instead of allowing stop.",
       "default": false
     },
     "NOTIFY_WEBHOOK": {
       "type": "string",
+      "title": "Notification webhook URL",
       "description": "Optional URL POSTed on stuck / finalize / judge-error so unattended can mean 'notify me'.",
       "default": "",
       "sensitive": true

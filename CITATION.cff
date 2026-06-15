@@ -23,13 +23,15 @@ version: "0.1.0"
 keywords:
   - claude-code
   - claude-code-plugin
-  - ai-coding-agent
-  - llm-as-judge
-  - llm-judge-ensemble
-  - agent-verification
-  - unattended-agents
-  - completion-gating
-  - large-language-models
+  - claude-code-hooks
   - stop-hook
-  - agentic-loop
-  - evaluation
+  - ai-coding-agent
+  - autonomous-agents
+  - unattended-agents
+  - agent-verification
+  - completion-verification
+  - llm-as-judge
+  - judge-ensemble
+  - llm-evaluation
+  - large-language-models
+  - definition-of-done
