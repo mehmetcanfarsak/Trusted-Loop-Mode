@@ -69,12 +69,15 @@ if $UNINSTALL; then
   if [[ -f "$SETTINGS" ]] && command -v jq &>/dev/null; then
     echo "Removing Trusted-Loop hooks from $SETTINGS ..."
     TMP="$(mktemp)"
-    jq '
-      .hooks.Stop         = [.hooks.Stop[]?         | select(.hooks[]?.command | contains("trusted") | not)] |
-      .hooks.SubagentStop = [.hooks.SubagentStop[]? | select(.hooks[]?.command | contains("trusted") | not)] |
-      .hooks.PreCompact   = [.hooks.PreCompact[]?   | select(.hooks[]?.command | contains("trusted") | not)] |
-      .hooks.SessionStart = [.hooks.SessionStart[]? | select(.hooks[]?.command | contains("trusted") | not)]
-    ' "$SETTINGS" > "$TMP" && mv "$TMP" "$SETTINGS"
+    # Match on the absolute hooks_scripts dir, not a name substring — robust to
+    # the plugin path's casing and clone location.
+    jq --arg marker "$SCRIPTS_DIR" '
+      .hooks.Stop         = [.hooks.Stop[]?         | select(.hooks[]?.command | contains($marker) | not)] |
+      .hooks.SubagentStop = [.hooks.SubagentStop[]? | select(.hooks[]?.command | contains($marker) | not)] |
+      .hooks.PreCompact   = [.hooks.PreCompact[]?   | select(.hooks[]?.command | contains($marker) | not)] |
+      .hooks.SessionStart = [.hooks.SessionStart[]? | select(.hooks[]?.command | contains($marker) | not)]
+    ' "$SETTINGS" > "$TMP"
+    mv "$TMP" "$SETTINGS"
   fi
 
   echo "Done. Trusted-Loop has been removed."
@@ -92,20 +95,23 @@ done
 echo "Merging hooks into $SETTINGS ..."
 [[ -f "$SETTINGS" ]] || echo '{}' > "$SETTINGS"
 
+# Clean-path assignments (LHS is a plain path; RHS is computed). This avoids the
+# `(.path // []) |= ...` form, which jq 1.6 rejects as an invalid path expression.
+# jq and mv are separate statements so `set -e` aborts on a jq failure instead of
+# silently leaving settings unchanged.
 TMP="$(mktemp)"
-jq --arg stop "python3 $SCRIPTS_DIR/on_stop.py" \
+jq --arg marker "$SCRIPTS_DIR" \
+   --arg stop "python3 $SCRIPTS_DIR/on_stop.py" \
    --arg sub  "python3 $SCRIPTS_DIR/on_stop.py --subagent" \
    --arg pre  "python3 $SCRIPTS_DIR/on_precompact.py" \
    --arg ss   "python3 $SCRIPTS_DIR/on_session_start.py" '
-  (.hooks.Stop         // []) |= map(select(.hooks[]?.command | contains("trusted") | not)) |
-  (.hooks.SubagentStop // []) |= map(select(.hooks[]?.command | contains("trusted") | not)) |
-  (.hooks.PreCompact   // []) |= map(select(.hooks[]?.command | contains("trusted") | not)) |
-  (.hooks.SessionStart // []) |= map(select(.hooks[]?.command | contains("trusted") | not)) |
-  .hooks.Stop         += [{"hooks": [{"type": "command", "command": $stop, "timeout": 300}]}] |
-  .hooks.SubagentStop += [{"hooks": [{"type": "command", "command": $sub,  "timeout": 300}]}] |
-  .hooks.PreCompact   += [{"matcher": "auto|manual", "hooks": [{"type": "command", "command": $pre}]}] |
-  .hooks.SessionStart += [{"matcher": "compact|resume", "hooks": [{"type": "command", "command": $ss}]}]
-' "$SETTINGS" > "$TMP" && mv "$TMP" "$SETTINGS"
+  .hooks = (.hooks // {})
+  | .hooks.Stop         = (((.hooks.Stop         // []) | map(select(.hooks[]?.command | contains($marker) | not))) + [{"hooks": [{"type": "command", "command": $stop, "timeout": 300}]}])
+  | .hooks.SubagentStop = (((.hooks.SubagentStop // []) | map(select(.hooks[]?.command | contains($marker) | not))) + [{"hooks": [{"type": "command", "command": $sub,  "timeout": 300}]}])
+  | .hooks.PreCompact   = (((.hooks.PreCompact   // []) | map(select(.hooks[]?.command | contains($marker) | not))) + [{"matcher": "auto|manual", "hooks": [{"type": "command", "command": $pre}]}])
+  | .hooks.SessionStart = (((.hooks.SessionStart // []) | map(select(.hooks[]?.command | contains($marker) | not))) + [{"matcher": "compact|resume", "hooks": [{"type": "command", "command": $ss}]}])
+' "$SETTINGS" > "$TMP"
+mv "$TMP" "$SETTINGS"
 
 echo ""
 echo "Trusted-Loop Mode installed."
